@@ -50,6 +50,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup lowercase variables
+        id: vars
+        run: |
+          LOWERCASE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "owner=$LOWERCASE_OWNER" >> $GITHUB_OUTPUT
+          
+          SHORT_SHA=${GITHUB_SHA:0:7}
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT  
+  
       # 构建并推送
       - name: Build and push `Docker` image
         uses: docker/build-push-action@v5
@@ -57,5 +66,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner && toLower(github.repository_owner) }}/ci-cd-practice:${{ github.sha && substr(github.sha, 0, 7) }}
-            ghcr.io/${{ github.repository_owner && toLower(github.repository_owner) }}/ci-cd-practice:latest
+            ghcr.io/${{ steps.vars.outputs.owner }}/ci-cd-practice:${{ steps.vars.outputs.short_sha }}
+            ghcr.io/${{ steps.vars.outputs.owner }}/ci-cd-practice:latest
